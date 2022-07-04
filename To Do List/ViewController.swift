@@ -11,6 +11,7 @@ class ViewController: UIViewController {
 
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
+    // MARK: - Create Table view
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -21,20 +22,15 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         getAllItems()
-        
         
         title = "To Do List"
         
         tableView.delegate = self
         tableView.dataSource = self
-        
         view.addSubview(tableView)
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add,
-                                                            target: self,
-                                                            action: #selector(didTapAdd))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAdd))
     }
     
     override func viewDidLayoutSubviews() {
@@ -42,10 +38,9 @@ class ViewController: UIViewController {
         tableView.frame = view.bounds
     }
     
+    // MARK: - Actions
     @objc private func didTapAdd() {
-        let alert = UIAlertController(title: "New Item",
-                                      message: "Enter New Item",
-                                      preferredStyle: .alert)
+        let alert = UIAlertController(title: "New Item", message: "Enter New Item", preferredStyle: .alert)
         alert.addTextField(configurationHandler: nil)
         alert.addAction(UIAlertAction(title: "Submit", style: .cancel, handler: { [weak self] _ in
             guard let field = alert.textFields?.first, let text = field.text, !text.isEmpty else {
@@ -53,10 +48,8 @@ class ViewController: UIViewController {
             }
             self?.createitem(name: text)
         }))
-
         present(alert, animated: true)
     }
-    
     
     // MARK: - Core Data
     func getAllItems() {
@@ -66,9 +59,7 @@ class ViewController: UIViewController {
                 self.tableView.reloadData()
             }
         }
-        catch {
-            // Error
-        }
+        catch { /* Handle Error */ }
     }
     
     func createitem(name: String) {
@@ -79,9 +70,7 @@ class ViewController: UIViewController {
         do {
             try context.save()
             getAllItems()
-        } catch {
-            
-        }
+        } catch { /* Handle Error */ }
     }
     
     func deleteItem(item: ToDoListItem) {
@@ -89,9 +78,7 @@ class ViewController: UIViewController {
         do {
             try context.save()
             getAllItems()
-        } catch {
-            
-        }
+        } catch { /* Handle Error */ }
     }
     
     func updeteItem(item: ToDoListItem, newName: String) {
@@ -100,21 +87,19 @@ class ViewController: UIViewController {
         do {
             try context.save()
             getAllItems()
-        } catch {
-            
-        }
+        } catch { /* Handle Error */ }
     }
 }
 
+// MARK: - Extention for View Controller Table view
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return models.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let model = models[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = model.name
+        cell.textLabel?.text = models[indexPath.row].name
         return cell
     }
     
@@ -123,13 +108,9 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let item = models[indexPath.row]
         
         let actionSheet = UIAlertController(title: "Edit Cell", message: nil, preferredStyle: .actionSheet)
-        
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-
         actionSheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { [weak self] _ in
-            let alert = UIAlertController(title: "Edit Item",
-                                          message: "Edit Your Item",
-                                          preferredStyle: .alert)
+            let alert = UIAlertController(title: "Edit Item", message: "Edit Your Item", preferredStyle: .alert)
             alert.addTextField(configurationHandler: nil)
             alert.textFields?.first?.text = item.name
             alert.addAction(UIAlertAction(title: "Save", style: .cancel, handler: { [weak self] _ in
@@ -138,17 +119,14 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                 }
                 self?.updeteItem(item: item, newName: newName)
             }))
-
             self?.present(alert, animated: true)
         }))
         
-        actionSheet.addAction((UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
+        actionSheet.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
             self?.deleteItem(item: item)
-        })))
+        }))
         
         present(actionSheet, animated: true)
     }
-    
-    
 }
 
